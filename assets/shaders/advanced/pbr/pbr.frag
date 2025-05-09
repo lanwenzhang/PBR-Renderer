@@ -7,7 +7,6 @@ in vec3 normal;
 in vec3 worldPosition;
 in mat3 tbn;
 
-
 uniform float intensity;
 uniform vec3 cameraPosition;
 
@@ -32,8 +31,8 @@ float NDF_GGX(vec3 N, vec3 H, float roughness){
 	float NdotH = max(dot(N, H), 0.0);
 
 	float num = a2;
-	float denom = PI * (NdotH * NdotH * (a2 - 1.0) + 1.0);
-
+	float denom = (NdotH * NdotH * (a2 - 1.0) + 1.0);
+	denom = PI * denom * denom;
 	denom = max(denom, 0.0001);
 
 	return num / denom;
@@ -82,22 +81,22 @@ vec3 fresnelSchlickRoughness(vec3 F0, float HdotV, float roughness){
 void main()
 {
 	// 1 Prepare common variable
-	vec3 albedo = texture(albedoTex, uv).xyz;
+	// 1.1 View vector
 	vec3 V = normalize(cameraPosition - worldPosition);
-	
+
+	// 1.2 A, M, R, N texture
+	vec3 albedo = texture(albedoTex, uv).xyz;
 	vec3 N = texture(normalTex, uv).rgb;
 	N = N * 2.0 - 1.0;
 	N = normalize(tbn * N);
-
-	float metallic = texture(metallicTex, uv).b;
+	float metallic = texture(metallicTex, uv).r;
 	float roughness = texture(roughnessTex, uv).r;
 
-
-	// 2 Calculate F0
+	// 1.3 Calculate F0
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
 
-	// 3 Calculate radiance
+	// 2 Calculate direct light
 	vec3 Lo = vec3(0.0);
 	for(int i = 0; i < 4; i++){
 
@@ -130,11 +129,13 @@ void main()
 		Lo += (kd * albedo / PI + specularBRDF) * irradiance;
 	}
 
-
+	// 3 Calculate indirect light
+	// 3.1 Indirect diffuse
 	vec3 irradiance = texture(irradianceMap, N).rgb;
 	vec3 kd = 1.0 - fresnelSchlickRoughness(F0, max(dot(N, V), 0.0), roughness);
 	vec3 ambient = irradiance * albedo * kd;
 
+	// 4 Sum up
 	Lo += ambient;
 	FragColor = vec4(Lo, 1.0);
 }

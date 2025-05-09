@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include "../core.h"
 #include "../mesh/mesh.h"
 #include "../../application/camera/camera.h"
@@ -20,12 +19,9 @@ public:
 
 	~Renderer();
 
-
 	void render(Scene* scene,Camera* camera, std::vector<PointLight*> pointLights, unsigned int fbo = 0);
 
 	void renderObject(Object* object, Camera* camera, std::vector<PointLight*> pointLights);
-
-	//void renderShadowMap(Camera* camera, const std::vector<Mesh*>& meshes, PointLight* pointLight);
 
 	void msaaResolve(Framebuffer* src, Framebuffer* dst);
 
@@ -35,9 +31,7 @@ public:
 
 private:
 
-	// Category objects into opacity and transparent 
 	void projectObject(Object* obj);
-
 	Shader* pickShader(MaterialType type);
 
 	void setDepthState(Material* material);
@@ -49,26 +43,8 @@ private:
 private:
 
 	// Shaders
-	Shader* mPhongShader{ nullptr };
-	Shader* mWhiteShader{ nullptr };
-	Shader* mDepthShader{ nullptr };
-	Shader* mOpacityMaskShader{ nullptr };
 	Shader* mScreenShader{ nullptr };
 	Shader* mCubeShader{ nullptr };
-	Shader* mPhongEnvShader{ nullptr };
-	Shader* mPhongInstanceShader{ nullptr };
-	Shader* mGrassInstanceShader{ nullptr };
-
-	Shader* mPhongNormalShader{ nullptr };
-	Shader* mPhongParallaxShader{ nullptr };
-
-	Shader* mShadowShader{ nullptr };
-	Shader* mPhongShadowShader{ nullptr };
-	Shader* mPhongCSMShadowShader{ nullptr };
-
-	Shader* mShadowDistanceShader{ nullptr };
-	Shader* mPhongPointShadowShader{ nullptr };
-
 	Shader* mPbrShader{ nullptr };
 
 	// Objects

@@ -8,7 +8,6 @@
 
 std::map<std::string, Texture*> Texture::mTextureCache{};
 
-// Texture cache from drive
 Texture* Texture::createTexture(const std::string& path, unsigned int unit) {
     
     // 1 Check if generate before
@@ -25,7 +24,6 @@ Texture* Texture::createTexture(const std::string& path, unsigned int unit) {
     return texture;
 }
 
-// Texture cache from memory
 Texture* Texture::createTextureFromMemory(const std::string& path, unsigned int unit,unsigned char* dataIn, uint32_t widthIn,uint32_t heightIn) {
 
     auto iter = mTextureCache.find(path);
@@ -41,22 +39,14 @@ Texture* Texture::createTextureFromMemory(const std::string& path, unsigned int 
     return texture;
 }
 
-
-Texture* Texture::createColorAttachment(
-    unsigned int width,
-    unsigned int height,
-    unsigned int unit) {
+Texture* Texture::createColorAttachment(unsigned int width, unsigned int height,unsigned int unit) {
 
     return new Texture(width, height, unit);
 }
 
-Texture* Texture::createDepthStencilAttachment(
-    unsigned int width,
-    unsigned int height,
-    unsigned int unit) {
+Texture* Texture::createDepthStencilAttachment(unsigned int width, unsigned int height, unsigned int unit) {
 
     Texture* dsTex = new Texture();
-
 
     unsigned int depthStencil;
     glGenTextures(1, &depthStencil);
@@ -69,7 +59,6 @@ Texture* Texture::createDepthStencilAttachment(
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthStencil, 0);
 
-
     dsTex->mTexture = depthStencil;
     dsTex->mWidth = width;
     dsTex->mHeight = height;
@@ -78,13 +67,9 @@ Texture* Texture::createDepthStencilAttachment(
     return dsTex;
 }
 
-Texture* Texture::createDepthAttachment(
-    unsigned int width,
-    unsigned int height,
-    unsigned int unit) {
+Texture* Texture::createDepthAttachment(unsigned int width, unsigned int height, unsigned int unit) {
 
     Texture* depthTex = new Texture();
-
 
     unsigned int depth;
     glGenTextures(1, &depth);
@@ -112,71 +97,6 @@ Texture* Texture::createDepthAttachment(
 
 }
 
-Texture* Texture::createDepthAttachmentCSMArray(
-    unsigned int width,
-    unsigned int height,
-    unsigned int layerNum,
-    unsigned int unit) {
-
-    Texture* dTex = new Texture();
-
-    unsigned int depth;
-    glGenTextures(1, &depth);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, depth);
-    
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, layerNum, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    GLfloat borderColor[] = { 0.0, 0.0, 0.0, 0.0 };
-    glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
-    dTex->mTexture = depth;
-    dTex->mWidth = width;
-    dTex->mHeight = height;
-    dTex->mUnit = unit;
-    dTex->mTextureTarget = GL_TEXTURE_2D_ARRAY;
-
-    return dTex;
-}
-
-Texture* Texture::createDepthAttachmentCubeMap(unsigned int width, unsigned int height,unsigned int unit) {
-    Texture* dTex = new Texture();
-
-    unsigned int depth;
-    glGenTextures(1, &depth);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, depth);
-
-    for (int i = 0; i < 6; i++) {
-        glTexImage2D(
-            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-            0, GL_DEPTH_COMPONENT,
-            width, height, 0,
-            GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    }
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    dTex->mTexture = depth;
-    dTex->mWidth = width;
-    dTex->mHeight = height;
-    dTex->mUnit = unit;
-    dTex->mTextureTarget = GL_TEXTURE_CUBE_MAP;
-
-    return dTex;
-}
-
 Texture* Texture::createMultiSampleTexture(unsigned int width, unsigned int height, unsigned int samples, unsigned int format, unsigned int unit) {
 
     Texture* tex = new Texture();
@@ -198,11 +118,7 @@ Texture* Texture::createMultiSampleTexture(unsigned int width, unsigned int heig
     return tex;
 }
 
-Texture* Texture::createHDRTexture(
-    unsigned int width,
-    unsigned int height,
-    unsigned int unit
-) {
+Texture* Texture::createHDRTexture(unsigned int width, unsigned int height,unsigned int unit) {
 
     Texture* tex = new Texture();
 
@@ -229,7 +145,6 @@ Texture* Texture::createHDRTexture(
     return tex;
 
 }
-
 
 Texture* Texture::createNearestTexture(std::string path) {
 
@@ -306,49 +221,48 @@ Texture* Texture::createExrCubeMap(std::vector<std::string> paths) {
     glGenTextures(1, &glTex);
     glBindTexture(GL_TEXTURE_CUBE_MAP, glTex);
 
-    for (int i = 0; i < 6; i++){
-        
-        float* data = nullptr;
-        int width, height;
-        const char* err = nullptr;
-        int ret;
+    int width = 0, height = 0;
+    float* data = nullptr;
+    const char* err = nullptr;
+    int ret = 0;
+    float maxNumber = 0.0;
 
+    for (int i = 0; i < paths.size(); i++) {
+     
         ret = LoadEXR(&data, &width, &height, paths[i].c_str(), &err);
-        if (ret != TINYEXR_SUCCESS) {
-
-            if (err) {
-
-                std::cerr << "Error Loading Exr:" << err << std::endl;
-                FreeEXRErrorMessage(err);
-            }
-
-            return nullptr;
+        for (int k = 0; k < width * height * 4; k++) {
+            maxNumber = data[k] > maxNumber ? data[k] : maxNumber;
         }
-
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, data);
-        free(data);
+        if (data != nullptr) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGBA, GL_FLOAT, data);
+        }
+        else {
+            std::cout << "Error: CubeMap Texture failed to load at path¡¡£­" << paths[i] << std::endl;
+        }
     }
-  
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    std::cout << maxNumber << std::endl;
+  
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
     tex->mTexture = glTex;
+    tex->mWidth = width;
+    tex->mHeight = height;
     tex->mUnit = 0;
     tex->mTextureTarget = GL_TEXTURE_CUBE_MAP;
 
     return tex;
 }
 
-
 Texture::Texture() {}
 
-// Load from drive
 Texture::Texture(const std::string &path, unsigned int unit, unsigned int internalFormat){
     
     mUnit = unit;
@@ -383,7 +297,6 @@ Texture::Texture(const std::string &path, unsigned int unit, unsigned int intern
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
-// Load texture from memory
 Texture::Texture(unsigned int unit, unsigned char* dataIn, uint32_t widthIn, uint32_t heightIn, unsigned int internalFormat) 
 {
     mUnit = unit;
@@ -447,7 +360,6 @@ Texture::Texture(unsigned int width, unsigned int height, unsigned int unit, uns
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-// Order: right, left, up, bottom, back, front
 Texture::Texture(const std::vector<std::string>& paths, unsigned int unit, unsigned int internalFormat) {
 
     mUnit = unit;

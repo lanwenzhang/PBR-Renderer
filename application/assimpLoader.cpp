@@ -1,6 +1,6 @@
 #include "assimpLoader.h"
 #include "../glframework/tools/tools.h"
-#include "../glframework/material/phongMaterial.h"
+#include "../glframework/material/advanced/pbrMaterial.h"
 
 Object* AssimpLoader::load(const std::string& path) {
 
@@ -10,7 +10,7 @@ Object* AssimpLoader::load(const std::string& path) {
 	Object* rootNode = new Object();
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
 
 	// Check whether readfile succeed
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -64,6 +64,7 @@ Mesh* AssimpLoader::processMesh(aiMesh* aimesh, const aiScene* scene, const std:
 	std::vector<float> normals;
 	std::vector<float> uvs;
 	std::vector<unsigned int> indices;
+	std::vector<float> tangents;
 
 	// 1 Positions information
 	for (int i = 0; i < aimesh->mNumVertices; i++) {
@@ -87,6 +88,12 @@ Mesh* AssimpLoader::processMesh(aiMesh* aimesh, const aiScene* scene, const std:
 			uvs.push_back(0.0f);
 		}
 
+		if (aimesh->HasTangentsAndBitangents()) {
+
+			tangents.push_back(aimesh->mTangents[i].x);
+			tangents.push_back(aimesh->mTangents[i].y);
+			tangents.push_back(aimesh->mTangents[i].z);
+		}
 	}
 
 
@@ -103,36 +110,56 @@ Mesh* AssimpLoader::processMesh(aiMesh* aimesh, const aiScene* scene, const std:
 	}
 
 	// 3 Create geometry
-	auto geometry = new Geometry(positions, normals, uvs, indices);
-	auto material = new PhongMaterial();
+	auto geometry = new Geometry(positions, normals, uvs, indices, tangents);
+	auto material = new PbrMaterial();
 
 	// 4 Create texture
 	if (aimesh->mMaterialIndex >= 0) {
-		Texture* texture = nullptr;
+
 		aiMaterial* aiMat = scene->mMaterials[aimesh->mMaterialIndex];
 
-		// 4.1 Read diffuse texture
-		texture = processTexture(aiMat, aiTextureType_DIFFUSE, scene, rootPath);
-		if (texture == nullptr) {
-			texture = Texture::createTexture("assets/textures/defaultTexture.jpg", 0);
+		material->mAlbedo = processTexture(aiMat, aiTextureType_BASE_COLOR, scene, rootPath);
+		if (!material->mAlbedo) {
+
+			material->mAlbedo = new Texture("assets/textures/pbr/Cerberus_A.jpg", 0, GL_SRGB_ALPHA);
 		}
 
-		material->mDiffuse = texture;
-	}
-	else {
-		material->mDiffuse = Texture::createTexture("assets/textures/defaultTexture.jpg", 0);
+		material->mNormal = processTexture(aiMat, aiTextureType_NORMALS, scene, rootPath);
+		if (!material->mNormal) {
+
+			material->mNormal = Texture::createNearestTexture("assets/textures/pbr/Cerberus_N.jpg");
+		}
+
+		material->mRoughness = processTexture(aiMat, aiTextureType_DIFFUSE_ROUGHNESS, scene, rootPath);
+		if (!material->mRoughness) {
+
+			material->mRoughness = Texture::createNearestTexture("assets/textures/pbr/Cerberus_R.jpg");
+		}
+
+		material->mMetallic = processTexture(aiMat, aiTextureType_METALNESS, scene, rootPath);
+		if (!material->mMetallic) {
+
+			material->mMetallic = Texture::createNearestTexture("assets/textures/pbr/Cerberus_M.jpg");
+		}
+
+		material->mIrradianceIndirect = Texture::createExrCubeMap(
+			{
+				"assets/textures/pbr/IBL/env_0.exr",
+				"assets/textures/pbr/IBL/env_1.exr",
+				"assets/textures/pbr/IBL/env_2.exr",
+				"assets/textures/pbr/IBL/env_3.exr",
+				"assets/textures/pbr/IBL/env_4.exr",
+				"assets/textures/pbr/IBL/env_5.exr",
+			}
+			);
+
 	}
 
 	return new Mesh(geometry, material);
 
 }
 
-Texture* AssimpLoader::processTexture(
-	const aiMaterial* aimat,
-	const aiTextureType& type,
-	const aiScene* scene,
-	const std::string& rootPath
-) {
+Texture* AssimpLoader::processTexture(const aiMaterial* aimat, const aiTextureType& type, const aiScene* scene,const std::string& rootPath) {
 
 	Texture* texture = nullptr;
 

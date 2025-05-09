@@ -1,38 +1,35 @@
+# 1 Set version and project name
+project(PBRRender)
 cmake_minimum_required(VERSION 3.12)
-
-#Project name
-project(PBR Renderer)
-
-#C++ minimum version
 set(CMAKE_CXX_STANDARD 17)
-
-#add debug 
 add_definitions (-DDEBUG)
 
-#add assets
-file(GLOB ASSETS "./assets" "./thirdParty/bin/assimp/assimp-vc143-mtd.dll")
+# 2 Copy assets and .dll
+file(GLOB copyResources "./assets" "./thirdParty/bin/assimp/assimp-vc143-mtd.dll")
+file(COPY ${copyResources} DESTINATION ${CMAKE_BINARY_DIR})
 
-file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
-
-#include third party 
+# 3 Third party
+# 3.1 Include third party .h
 include_directories(
 
 	SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/include
-	SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/application/miniz)
+	SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/application/miniz
+)
 
+# 3.2 Link third party .lib
 link_directories(
 
 	SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/lib
 )
 
-#add wrapper subdirectory
+# 4 Add subdirectory
 add_subdirectory(wrapper)
 add_subdirectory(application)
 add_subdirectory(glframework)
 add_subdirectory(imgui)
 
-#Main program file and name
+# 5 Main directory
 add_executable(pbr "main.cpp" "glad.c")
 
-#add glfw3 lib to exe
+# 6 Link subdirectory and third party .lib
 target_link_libraries(pbr glfw3.lib assimp-vc143-mtd.lib zlibstaticd.lib wrapper app fw imguilib)

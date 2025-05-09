@@ -5,16 +5,18 @@
 
 class Shader {
 public:
+
 	Shader(const char* vertexPath, const char* fragmentPath);
 	
 	std::string loadShader(const std::string& filePath);
 
 	~Shader();
 
-	void begin(); //Begin using current shader
+	void begin(); 
 
-	void end(); //End using current shader
+	void end(); 
 
+	void setInt(const std::string& name, int value);
 	void setFloat(const std::string& name, float value);
 	void setFloatArray(const std::string& name, float* value, int count);
 
@@ -22,14 +24,12 @@ public:
 	void setVector3(const std::string& name, const float* values);
 	void setVector3(const std::string& name, const glm::vec3 value);
 
-
-	void setInt(const std::string& name, int value);
-
 	void setMatrix4x4(const std::string& name, glm::mat4 value);
 	void setMatrix4x4Array(const std::string& name, glm::mat4* value, int count);
 	void setMatrix3x3(const std::string& name, glm::mat3 value);
 
 private:
+
 	void checkShaderErrors(GLuint target, std::string type);
 
 private:

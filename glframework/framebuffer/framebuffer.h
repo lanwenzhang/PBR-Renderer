@@ -11,9 +11,6 @@ public:
 	Framebuffer(unsigned int width, unsigned int height);
 	~Framebuffer();
 	
-	static Framebuffer* createShadowFbo(unsigned int width, unsigned int height);
-	static Framebuffer* createCSMShadowFbo(unsigned int width, unsigned int height, unsigned int layerNumber);
-	static Framebuffer* createPointShadowFbo(unsigned int width, unsigned int height);
 	static Framebuffer* createMultiSampleFbo(unsigned int width, unsigned int height, unsigned int samples);
 	static Framebuffer* createHDRFbo(unsigned int width, unsigned int height);
 	static Framebuffer* createHDRBloomFbo(unsigned int width, unsigned int height);

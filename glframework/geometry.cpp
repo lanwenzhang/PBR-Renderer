@@ -1,5 +1,4 @@
 #include "geometry.h"
-#include <vector>
 
 Geometry::Geometry(){}
 

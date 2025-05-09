@@ -1,38 +1,13 @@
 #include "renderer.h"
-#include <iostream>
-#include "../material/phongMaterial.h"
-#include "../material/whiteMaterial.h"
-#include "../material/opacityMaskMaterial.h"
 #include "../material/screenMaterial.h"
 #include "../material/cubeMaterial.h"
-#include "../material/phongEnvMaterial.h"
-#include "../material/phongInstanceMaterial.h"
-#include "../material/grassInstanceMaterial.h"
-#include "../material/advanced/phongNormalMaterial.h"
-#include "../material/advanced/phongParallaxMaterial.h"
-#include "../material/advanced/phongShadowMaterial.h"
-#include "../material/advanced/phongCSMShadowMaterial.h"
-#include "../material/advanced/phongPointShadowMaterial.h"
 #include "../material/advanced/pbrMaterial.h"
-
-#include "../mesh/instancedMesh.h"
-
 #include "../../application/camera/orthographicCamera.h"
-
-#include "../light/shadow/directionalLightShadow.h"
-#include "../light/shadow/directionalLightCSMShadow.h"
-#include "../light/shadow/pointLightShadow.h"
-
-#include <string>
-#include <algorithm>
 
 Renderer::Renderer() {
 
 	mScreenShader = new Shader("assets/shaders/screen.vert", "assets/shaders/screen.frag");
 	mCubeShader = new Shader("assets/shaders/cube.vert", "assets/shaders/cube.frag");
-	mPhongEnvShader = new Shader("assets/shaders/phongEnv.vert", "assets/shaders/phongEnv.frag");
-	
-	mPhongShader = new Shader("assets/shaders/advanced/phong.vert", "assets/shaders/advanced/phong.frag");
 	mPbrShader = new Shader("assets/shaders/advanced/pbr/pbr.vert", "assets/shaders/advanced/pbr/pbr.frag");
 }
 
@@ -139,9 +114,7 @@ void Renderer::msaaResolve(Framebuffer* src, Framebuffer* dst) {
 
 void Renderer::render(Scene* scene, Camera* camera, std::vector<PointLight*> pointLights, unsigned int fbo) {
 
-
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
 
 	// 1 Depth and stencil test
 	// 1.1 Depth test
@@ -195,8 +168,7 @@ void Renderer::render(Scene* scene, Camera* camera, std::vector<PointLight*> poi
 		}
 	);
 
-
-	// 5 Render objects
+	// 4 Render objects
 	for (int i = 0; i < mOpacityObjects.size(); i++) {
 
 		renderObject(mOpacityObjects[i], camera, pointLights);
@@ -212,7 +184,7 @@ void Renderer::render(Scene* scene, Camera* camera, std::vector<PointLight*> poi
 
 void Renderer::projectObject(Object* obj) {
 
-	if (obj->getType() == ObjectType::Mesh || obj->getType() == ObjectType::InstancedMesh) {
+	if (obj->getType() == ObjectType::Mesh) {
 
 		Mesh* mesh = (Mesh*)obj;
 		auto material = mesh->mMaterial;
@@ -238,14 +210,12 @@ Shader* Renderer::pickShader(MaterialType type) {
 	Shader* result = nullptr;
 
 	switch (type) {
+
 	case MaterialType::ScreenMaterial:
 		result = mScreenShader;
 		break;
 	case MaterialType::CubeMaterial:
 		result = mCubeShader;
-		break;
-	case MaterialType::PhongEnvMaterial:
-		result = mPhongEnvShader;
 		break;
 	case MaterialType::PbrMaterial:
 		result = mPbrShader;
@@ -307,7 +277,7 @@ void Renderer::renderObject(Object* object, Camera* camera,std::vector<PointLigh
 
 			shader->setFloat("exposure", screenMat->mExposure);
 		}
-										break;
+			break;
 		case MaterialType::PbrMaterial: {
 
 			// pointer type change
@@ -369,7 +339,7 @@ void Renderer::renderObject(Object* object, Camera* camera,std::vector<PointLigh
 			shader->setInt("cubeSampler", 0);
 			cubeMat->mDiffuse->bind();
 		}
-		      break;
+		    break;
 		default:
 			break;
 		}
@@ -378,18 +348,7 @@ void Renderer::renderObject(Object* object, Camera* camera,std::vector<PointLigh
 		glBindVertexArray(geometry->getVao());
 
 		// 3.4 Draw
-		if (mesh->getType() == ObjectType::InstancedMesh) {
-
-			InstancedMesh* im = (InstancedMesh*)mesh;
-			glDrawElementsInstanced(GL_TRIANGLES, geometry->getIndicesCount(), GL_UNSIGNED_INT, 0, im->mInstanceCount);
-
-		}
-		else {
-
-			glDrawElements(GL_TRIANGLES, geometry->getIndicesCount(), GL_UNSIGNED_INT, 0);
-
-		}
-
+		glDrawElements(GL_TRIANGLES, geometry->getIndicesCount(), GL_UNSIGNED_INT, 0);
 		shader->end();
 	}
 }

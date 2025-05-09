@@ -7,13 +7,11 @@
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath){
 	
-    // Save the vertex and fragment shader code 
 	std::string vertexCode;
 	std::string fragmentCode;
 
 	try {
 
-		// Save to the code
         vertexCode = loadShader(vertexPath);
 		fragmentCode = loadShader(fragmentPath);
 
@@ -108,7 +106,6 @@ void Shader::setFloat(const std::string& name, float value) {
     // 2 Input value to uniform
     glUniform1f(location, value);
 }
-
 
 void Shader::setFloatArray(const std::string& name, float* value, int count) {
 

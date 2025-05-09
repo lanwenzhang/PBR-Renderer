@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "application.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -35,7 +35,7 @@ bool Application::init(const int& width, const int& height) {
 
 
     // 2 Create a window object
-    mWindow = glfwCreateWindow(mWidth, mHeight, "OpenGL Project", NULL, NULL);
+    mWindow = glfwCreateWindow(mWidth, mHeight, "PBR", NULL, NULL);
     if (mWindow == NULL) {
         return false;
     }
@@ -64,14 +64,13 @@ bool Application::init(const int& width, const int& height) {
 }
 
 bool Application::update() {
+
     if (glfwWindowShouldClose(mWindow)) {
         return false;
     }
     
     // Get and send message
     glfwPollEvents();
-
-
 
     // Swap double buffer
     glfwSwapBuffers(mWindow);
