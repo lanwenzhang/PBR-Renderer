@@ -3,6 +3,7 @@
 A framework for physically based rendering using the Cook-Torrance BRDF model and image-based lighting
 
 ## Screenshots
+![PBR-Renderer](data/screenshot.gif)
 
 ## Features
 * Physically-based Rendering with GGX-Smith BRDFs
