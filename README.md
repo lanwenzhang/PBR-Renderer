@@ -1,6 +1,6 @@
 # PBR-Renderer
 
-A framework for physically based rendering using the Cook-Torrance BRDF model and image-based lighting
+A physically-based rendering system using the Cook-Torrance BRDF model and image-based lighting
 
 ## Screenshots
 ![PBR-Renderer](data/screenshot.gif)
